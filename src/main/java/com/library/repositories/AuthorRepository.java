@@ -1,13 +1,10 @@
 package com.library.repositories;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.library.entities.Author;
 
-public interface AuthorRepository extends JpaRepository<Author, Integer>{
-	List<Author> findByNameAndNationality(String name, String nationality);
-	List<Author> findByName(String name);
-	List<Author> findByNationality(String nationality);
+public interface AuthorRepository extends JpaRepository<Author, Integer>,  JpaSpecificationExecutor<Author>{
+	
 }
