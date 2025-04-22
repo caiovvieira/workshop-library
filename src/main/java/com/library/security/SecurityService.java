@@ -16,9 +16,12 @@ public class SecurityService {
 
     public Client getLoggedClient(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String login = userDetails.getUsername();
-        return clientService.getByLogin(login);
+
+        if(authentication instanceof CustomAuthentication customAuthentication){
+            return customAuthentication.getClient();
+        }
+
+        return null;
     }
 }
 
