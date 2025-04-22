@@ -3,6 +3,8 @@ package com.library.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.library.entities.Client;
+import com.library.security.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -23,7 +25,16 @@ public class AuthorService {
 
 	@Autowired
 	private AuthorRepository authorRepository;
-	
+
+	@Autowired
+	private SecurityService securityService;
+
+	@Transactional
+	public Author insert(Author author) {
+		Client client = securityService.getLoggedClient();
+		author.setClient(client);
+		return authorRepository.save(author);
+	}
 	
 	
 	public Page<Author> findAll(Integer page, Integer size) {
@@ -32,17 +43,10 @@ public class AuthorService {
 		
 	}
 
-	
 	public Optional<Author> findById(Integer id) {
 		return authorRepository.findById(id);
 	}
-	
-	
-	@Transactional
-	public Author insert(Author author) {
-		return authorRepository.save(author);
-	}
-	
+
 	@Transactional
 	public Author update(Integer id, Author author) {
 		Author authorReference = authorRepository.getReferenceById(id);

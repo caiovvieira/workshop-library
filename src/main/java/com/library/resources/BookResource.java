@@ -1,29 +1,25 @@
 package com.library.resources;
 
-import java.net.URI;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import com.library.entities.Book;
+import com.library.entities.Client;
 import com.library.entities.enums.Gender;
 import com.library.resources.dto.BookDTO;
 import com.library.resources.dto.BookSearchResultDTO;
+import com.library.resources.dto.ClientSearchResultDTO;
 import com.library.resources.mappers.BookMapper;
+import com.library.resources.mappers.ClientMapper;
 import com.library.services.BookService;
+import com.library.services.ClientService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/books")
@@ -34,20 +30,29 @@ public class BookResource {
 	
 	@Autowired
 	BookMapper bookMapper;
+
+	@Autowired
+	ClientService clientService;
+
+	@Autowired
+	ClientMapper clientMapper;
 	
 	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Page<BookSearchResultDTO>> findAll(
 			@RequestParam(value = "page", defaultValue = "0")
 			Integer page,
 			@RequestParam(value = "size", defaultValue = "10")
-			Integer size
+			Integer size,
+			Authentication authentication
 	){
 		Page<Book> books = bookService.findAll(page, size);
 		Page<BookSearchResultDTO> result = books.map(bookMapper::toDto);
 		return ResponseEntity.ok().body(result);
 	}
-	
+
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<BookSearchResultDTO> insert(@RequestBody BookDTO bookDto){
 		Book book = bookService.insert(bookMapper.toEntity(bookDto));
 		BookSearchResultDTO result = bookMapper.toDto(book);
@@ -61,6 +66,7 @@ public class BookResource {
 	}
 	
 	@GetMapping(value = "/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<BookSearchResultDTO> findById(@PathVariable Integer id){
 		Book book = bookService.findById(id);
 		BookSearchResultDTO result = bookMapper.toDto(book);
@@ -68,6 +74,7 @@ public class BookResource {
 	}
 	
 	@PutMapping(value = "/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<BookSearchResultDTO> update(@PathVariable Integer id, @RequestBody BookDTO bookDto){
 		Book book = bookMapper.toEntity(bookDto);
 		BookSearchResultDTO result = bookMapper.toDto(book);
@@ -76,12 +83,14 @@ public class BookResource {
 	}
 	
 	@DeleteMapping(value = "/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Integer id){
 		bookService.delete(id);
 		return ResponseEntity.noContent().build();
 	}
 	
 	@GetMapping(value = "search")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Page<BookSearchResultDTO>> search(
 			@RequestParam(value = "id", required = false)
 			Integer id, 
